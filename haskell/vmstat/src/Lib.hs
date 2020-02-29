@@ -1,4 +1,6 @@
-module Main where
+module Lib
+    ( vmstat 
+    ) where
 
 -- vmstat.log 
 -- 2020-02-25 00:00:25 procs -----------memory---------- ---swap-- -----io---- --system-- -----cpu-----
@@ -6,7 +8,6 @@ module Main where
 -- 2020-02-25 00:00:25  0  0 1401944 185212 130404 490940    0    0     0     0  168  328  1  0 100  0  0  -- 2020-02-25 00:00:26  0  0 1401944 185212 130404 490940    0    0     0     0  176  325  0  0 99   0  0   
 -- 1          2         3  4 5       6      7      8         9   10    11    12   13   14 15 16 17  18 19
 
-import System.Environment (getArgs)
 import System.IO
 import Text.Read (readMaybe)
 
@@ -191,9 +192,7 @@ summarize' (stat:stats) tmp_stats sum_stats
 summarize :: [Stat] -> [Stat]
 summarize stats = summarize' stats [] [] 
 
-main :: IO()
-main = do
-    args <- getArgs 
+vmstat args = do
     ls <- load args
     showResult $ summarize $ proc ls
     
