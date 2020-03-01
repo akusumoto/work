@@ -1,4 +1,6 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 import System.IO
+import Control.Exception
 
 loop :: Int -> Handle -> IO()
 loop i h = do
@@ -13,6 +15,10 @@ loop i h = do
 
 main :: IO()
 main = do
-    h <- openFile "sample.txt" ReadMode
-    loop 0 h
-    hClose h
+    -- h <- openFile "sample.txt" ReadMode
+        h <- openFile "sample.txt" ReadMode
+        loop 0 h
+        hClose h
+    `catch` (
+        \(e :: SomeException) -> putStrLn $ "read failure: " ++ displayException e
+    )
