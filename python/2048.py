@@ -5,11 +5,12 @@ def init_field():
     return field
 
 def print_field(field):
+    print
     for y in range(4):
         for x in range(4):
             i = y*4+x
             if field[i] > 0:
-                print "%4d " % field[y*4+x],
+                print "%4d " % field[i],
             else:
                 print ".... ",
         print
@@ -42,103 +43,36 @@ def add_tile(field):
 
     return field
 
-"""
-    a <-- --> d
-w    0  1  2  3
-^
-|    4  5  6  7
- 
-|    8  9 10 11
-v
-s   12 13 14 15
-"""
+def update_field2(field, calc_pos):
+    for i in range(4):
+        v = 0
+        r = 0
+        for j in range(4):
+            p = calc_pos(i, j)
+            rr = calc_pos(i, r)
+            if field[p] > 0:
+                if v == field[p]:
+                    field[rr] = v + field[p]
+                    v = 0
+                    r += 1
+                elif v > 0:
+                    field[rr] = v
+                    v = field[p]
+                    r += 1
+                else: # v == 0
+                    v = field[p]
+        for s in range(r, 4):
+            ss = calc_pos(i, s)
+            field[ss] = v
+            v = 0
+
+    return field
 
 def update_field(field, direction):
-    if direction == 'a':
-        for i in range(4):
-            # 0 1 2 3    4 5 6 7 ...
-            v = 0
-            r = 0
-            for j in range(4):
-                p = i*4+j    
-                if field[p] > 0:
-                    if v == field[p]:
-                        field[i*4+r] = v + field[p]
-                        v = 0
-                        r += 1
-                    elif v > 0:
-                        field[i*4+r] = v
-                        v = field[p]
-                        r += 1
-                    else: # v == 0
-                        v = field[p]
-            for s in range(r, 4):
-                field[i*4+s] = v
-                v = 0
-
-    elif direction == 'w':
-        for i in range(4):
-            v = 0
-            r = 0
-            for j in range(4):
-                p = i+j*4
-                if field[p] > 0:
-                    if v == field[p]:
-                        field[i+r*4] = v + field[p]
-                        v = 0
-                        r += 1
-                    elif v > 0:
-                        field[i+r*4] = v 
-                        v = field[p]
-                        r += 1
-                    else:
-                        v = field[p]
-            for s in range(r, 4):
-                field[i+s*4] = v
-                v = 0
-
-    elif direction == 's':
-        for i in range(4):
-            v = 0
-            r = 0
-            for j in range(4):
-                p = (4-(i+1))+(4-(j+1))*4
-                if field[p] > 0:
-                    if v == field[p]:
-                        field[(4-(i+1))+(4-(r+1))*4] = v + field[p]
-                        v = 0
-                        r += 1
-                    elif v > 0:
-                        field[(4-(i+1))+(4-(r+1))*4] = v 
-                        v = field[p]
-                        r += 1
-                    else:
-                        v = field[p]
-            for s in range(r, 4):
-                field[(4-(i+1))+(4-(s+1))*4] = v
-                v = 0
-
-    elif direction == 'd':
-        for i in range(4):
-            v = 0
-            r = 0
-            for j in range(4):
-                p = i*4 + (4-(j+1))
-                if field[p] > 0:
-                    if v == field[p]:
-                        field[i*4+(4-(r+1))] = v + field[p]
-                        v = 0
-                        r += 1
-                    elif v > 0:
-                        field[i*4+(4-(r+1))] = v
-                        v = field[p]
-                        r += 1
-                    else:
-                        v = field[p]
-            for s in range(r, 4):
-                field[i*4+(4-(s+1))] = v
-                v = 0
-
+    if   direction == 'a': field = update_field2(field, lambda i, j: i*4+j)
+    elif direction == 'w': field = update_field2(field, lambda i, j: i+j*4)
+    elif direction == 's': field = update_field2(field, lambda i, j: (4-(i+1))+(4-(j+1))*4)
+    elif direction == 'd': field = update_field2(field, lambda i, j: i*4 + (4-(j+1)))
     else:
         print "invalid direction - " + dirction
         return field
@@ -153,6 +87,7 @@ def is_clear(field):
 
 def is_over(field):
     return (len([i for i in field if i == 0]) == 0)
+
 
 field = init_field()
 
