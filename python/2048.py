@@ -68,13 +68,13 @@ def update_field2(field, calc_pos):
 
     return field
 
-def update_field(field, direction):
-    if   direction == 'a': field = update_field2(field, lambda i, j: i*4+j)
-    elif direction == 'w': field = update_field2(field, lambda i, j: i+j*4)
-    elif direction == 's': field = update_field2(field, lambda i, j: (4-(i+1))+(4-(j+1))*4)
-    elif direction == 'd': field = update_field2(field, lambda i, j: i*4 + (4-(j+1)))
+def update_field(field, key):
+    if   key == 'a': field = update_field2(field, lambda i, j: i*4+j)
+    elif key == 'w': field = update_field2(field, lambda i, j: i+j*4)
+    elif key == 's': field = update_field2(field, lambda i, j: (4-(i+1))+(4-(j+1))*4)
+    elif key == 'd': field = update_field2(field, lambda i, j: i*4 + (4-(j+1)))
     else:
-        print "invalid direction - " + dirction
+        print "invalid direction - " + key
         return field
 
     field = add_tile(field)
@@ -97,13 +97,13 @@ while True:
     print_field(field)
 
     # input
-    direction = wait_input()
-    if direction == 'q':
+    key = wait_input()
+    if key == 'q':
         print "BYE!"
         sys.exit(0)
 
     # update field
-    field = update_field(field, direction)
+    field = update_field(field, key)
 
     # clear or not
     if is_clear(field):
