@@ -53,8 +53,15 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - practice
-
-
+  zigzag:
+    main:                Main.hs
+    source-dirs:         app/zigzag
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - practice
 
 tests:
   practice-test:
