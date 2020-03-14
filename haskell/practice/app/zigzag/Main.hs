@@ -1,6 +1,6 @@
 module Main where
 
-import Text.Printf
+import System.Environment (getArgs)
 
 --  y\x|  0  1  2  3  4
 -- ----+---------------- 
@@ -35,24 +35,37 @@ left_y y = y + 1
 right_x x = x + 1
 right_y y = y - 1
 
-next i = i + 1
+left_x_minus_reset _ = 0 
+left_y_minus_reset y = y 
+left_x_over_reset _ x = x + 2
+left_y_over_reset n _ = n - 1
+right_x_minus_reset x = x 
+right_y_minus_reset _ = 0 
+right_x_over_reset n _ = n - 1
+right_y_over_reset _ y = y + 2
 
 pos n x y = x + y * n
 
 zigzag_right n i x y arr
     | i == n*n  = arr
-    | x >= n    = zigzag_left n i (n-1) (y+2) arr
-    | y < 0     = zigzag_left n i x 0 arr
-    | otherwise = zigzag_right n (next i) (right_x x) (right_y y) arr2
+    | x >= n    = zigzag_left n i x3 y3 arr
+    | y < 0     = zigzag_left n i x2 y2 arr
+    | otherwise = zigzag_right n (i+1) x1 y1 arr2
     where
         p = pos n x y
         arr2 = (take p arr) ++ [i] ++ (drop (p+1) arr)
+        x1 = right_x x
+        y1 = right_y y
+        x2 = right_x_minus_reset x
+        y2 = right_y_minus_reset y
+        x3 = right_x_over_reset n x
+        y3 = right_y_over_reset n y
 
 zigzag_left n i x y arr 
     | i == n*n  = arr
-    | y >= n    = zigzag_right n i (x+2) (n-1) arr
-    | x < 0     = zigzag_right n i 0 y arr
-    | otherwise = zigzag_left n (next i) (left_x x) (left_y y) arr2
+    | y >= n    = zigzag_right n i x3 y3 arr
+    | x < 0     = zigzag_right n i x2 y2 arr
+    | otherwise = zigzag_left n (i+1) x1 y1 arr2
     where
         --   p =  0  1  2  3  ...
         -- arr = [a, b, c, d, ...]
@@ -63,18 +76,28 @@ zigzag_left n i x y arr
         --           +-- take p arr  +-- drop (p+1) arr
         p = pos n x y
         arr2 = (take p arr) ++ [i] ++ (drop (p+1) arr)
+        x1 = left_x x
+        y1 = left_y y
+        x2 = left_x_minus_reset x
+        y2 = left_y_minus_reset y
+        x3 = left_x_over_reset n x
+        y3 = left_y_over_reset n y
+        
 
 zigzag :: Int -> [Int]
 zigzag n = zigzag_right n 0 0 0 [0 | i <- [1..n*n]]
 
-formatNumber i 
-    | i < 10    = " " ++ show i
-    | otherwise = show i
+space 0 = ""
+space n = " " ++ space (n-1)
+
+formatNumber n i = space (length (show (n*n-1)) - length (show i)) ++ show i
 
 formatMatrix' _ _ [] = ""
-formatMatrix' n 1 (a:arr) = formatNumber a ++ "\n" ++ formatMatrix' n n arr
-formatMatrix' n i (a:arr) = formatNumber a ++ " " ++ formatMatrix' n (i-1) arr
+formatMatrix' n 1 (a:arr) = formatNumber n a ++ "\n" ++ formatMatrix' n n arr
+formatMatrix' n i (a:arr) = formatNumber n a ++ " " ++ formatMatrix' n (i-1) arr
 
 formatMatrix n arr = formatMatrix' n n arr
 
-main = putStrLn $ formatMatrix 5 $ zigzag 5
+main = do
+    args <- getArgs
+    putStrLn $ formatMatrix (read $ args !! 0) $ zigzag (read $ args !! 0)
