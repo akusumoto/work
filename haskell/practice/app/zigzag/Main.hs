@@ -27,65 +27,38 @@ import System.Environment (getArgs)
 --     |          / left
 --     |         v
 --     |       (24) 
---
---
 
-left_x x = x - 1
-left_y y = y + 1
-right_x x = x + 1
-right_y y = y - 1
-
-left_x_minus_reset _ = 0 
-left_y_minus_reset y = y 
-left_x_over_reset _ x = x + 2
-left_y_over_reset n _ = n - 1
-right_x_minus_reset x = x 
-right_y_minus_reset _ = 0 
-right_x_over_reset n _ = n - 1
-right_y_over_reset _ y = y + 2
+--   p =  0  1  2  3  ...
+-- arr = [a, b, c, d, ...]
+--              |
+--              +-- i = 1
+-- arr2 = [a, b] ++ [1] ++ [d, ...]
+--           |               |
+--           +-- take p arr  +-- drop (p+1) arr
 
 pos n x y = x + y * n
 
-zigzag_right n i x y arr
+zigzagr n i x y arr
     | i == n*n  = arr
-    | x >= n    = zigzag_left n i x3 y3 arr
-    | y < 0     = zigzag_left n i x2 y2 arr
-    | otherwise = zigzag_right n (i+1) x1 y1 arr2
+    | x >= n    = zigzagl n i (n-1) (y+2) arr
+    | y < 0     = zigzagl n i x 0 arr
+    | otherwise = zigzagr n (i+1) (x+1) (y-1) arr2
     where
-        p = pos n x y
+        p = x + y * n
         arr2 = (take p arr) ++ [i] ++ (drop (p+1) arr)
-        x1 = right_x x
-        y1 = right_y y
-        x2 = right_x_minus_reset x
-        y2 = right_y_minus_reset y
-        x3 = right_x_over_reset n x
-        y3 = right_y_over_reset n y
 
-zigzag_left n i x y arr 
+zigzagl n i x y arr 
     | i == n*n  = arr
-    | y >= n    = zigzag_right n i x3 y3 arr
-    | x < 0     = zigzag_right n i x2 y2 arr
-    | otherwise = zigzag_left n (i+1) x1 y1 arr2
+    | y >= n    = zigzagr n i (x+2) (n-1) arr
+    | x < 0     = zigzagr n i 0 y arr
+    | otherwise = zigzagl n (i+1) (x-1) (y+1) arr2
     where
-        --   p =  0  1  2  3  ...
-        -- arr = [a, b, c, d, ...]
-        --              |
-        --              +-- i = 1
-        -- arr2 = [a, b] ++ [1] ++ [d, ...]
-        --           |               |
-        --           +-- take p arr  +-- drop (p+1) arr
-        p = pos n x y
+        p = x + y * n
         arr2 = (take p arr) ++ [i] ++ (drop (p+1) arr)
-        x1 = left_x x
-        y1 = left_y y
-        x2 = left_x_minus_reset x
-        y2 = left_y_minus_reset y
-        x3 = left_x_over_reset n x
-        y3 = left_y_over_reset n y
         
 
 zigzag :: Int -> [Int]
-zigzag n = zigzag_right n 0 0 0 [0 | i <- [1..n*n]]
+zigzag n = zigzagr n 0 0 0 [0 | i <- [1..n*n]]
 
 space 0 = ""
 space n = " " ++ space (n-1)
