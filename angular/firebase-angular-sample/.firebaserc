@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "sample-c7937"
+  },
+  "targets": {
+    "sample-c7937": {
+      "hosting": {
+        "firebase-angular-sample": [
+          "sample-c7937"
+        ]
+      }
+    }
+  }
+}
