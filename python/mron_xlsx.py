@@ -5,6 +5,7 @@ import openpyxl
 import sys
 import os
 import copy
+import datetime
 
 sheet_names = ['A室(AM)', 'A室(PM)', 'B室(AM)', 'B室(PM)', 'C室(AM)', 'C室(PM)', 'D室(AM)', 'D室(PM)']
 
@@ -96,21 +97,10 @@ def get_hyokas(category, number, book):
                         tech_point=tech_point,
                         qa_point=qa_point, 
                         comment=comment)
-        print(hyoka)
+        #print(hyoka)
         hyokas.append(hyoka)
         
     return hyokas
-
-def find_sheet(book, present_cat, present_num):
-    present_cat.replace('-','')
-    room = '%s室(%s)' % (present_cat, 'AM' if present_num.startwith('1') else 'PM')
-    return book[room]
-
-def find_hyoka_column_num(shukei_book, hyoka, is_student):
-    if is_student:
-        pass
-    else:
-        pass
 
 def update_shukei(shukei_book, category, number, hyoka_book):
     hyokas = get_hyokas(category, number, hyoka_book)
@@ -122,16 +112,32 @@ def update_shukei(shukei_book, category, number, hyoka_book):
             print("sheet not found '%s' in shukei book - %s" % (hyoka.room, hyoka))
             continue
 
-        # AN = 39
+        # AN = 40
         # 102 -> (hyoka.number % 100 - 1) * 2 = 2 -> 39 + 2 = 41 -> AP
-        column_num = 39 + (hyoka.number % 100 - 1) * 2
-        if sheet.cell(row=3, column=column_num).value != hyoka.number:
-            print("student number is wrong - %d vs %d" % (hyoka.number, sheet.cell(row=3, column=column_num).value))
-        #sheet = find_sheet(shukei_book, hyoka.present_cat, hyoka.present_num)
+        column_num = 40 + (hyoka.number % 100 - 1) * 2
+        cell = sheet.cell(row=3, column=column_num)
+        if cell.value != hyoka.number:
+            # ichiou check suru
+            print("student number is wrong - number=%d vs %s=%d" % (hyoka.number, cell.coordinate, cell.value if cell.value else -1))
+            continue
 
-        hyoka_column_num = find_hyoka_column_num(shukei_book, hyoka, False)
-        #hyoka_column_num = find_hyoka_column_num(shukei_book, hyoka, hyoka.is_student)
+        # 5 -> 101 or 201
+        # 6 -> 102 or 202
+        row_num = 5 + (hyoka.present_num % 100 - 1)
+        cell = sheet.cell(row=row_num, column=3)
+        if not cell.value:
+            # empty cell
+            continue
+        if cell.value != hyoka.present_num:
+            # ichiou check suru
+            print("student number is wrong - present_num=%d vs %s=%d" % (hyoka.present_num, cell.coordinate, (cell.value if cell.value else -1)))
+            continue
 
+        tech_point_cell = sheet.cell(row=row_num, column=column_num)
+        qa_point_cell = sheet.cell(row=row_num, column=column_num+1)
+        tech_point_cell.value = hyoka.tech_point
+        qa_point_cell.value = hyoka.qa_point
+        print("update %s#%s:%s - %s" % (sheet.title, tech_point_cell.coordinate, qa_point_cell.coordinate, hyoka))
 
 if __name__ == '__main__':
     shukei_xls = sys.argv[1]
@@ -149,3 +155,11 @@ if __name__ == '__main__':
                 update_shukei(shukei_book, c, n, openpyxl.load_workbook(xls_path, read_only=True, data_only=True))
             except:
                 print("NG - %s\n%s" % (sys.exc_info()[0], sys.exc_info[2]))
+
+    filename = os.path.basename(shukei_xls)
+    filebase = os.path.splitext(filename)[0]
+    fileext = os.path.splitext(filename)[1]
+    newpath = os.path.join(basedir, filebase + "_auto_" + datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + fileext)
+    shukei_book.save(newpath)
+    print("saved to %s" % newpath)
+
