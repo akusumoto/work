@@ -195,6 +195,7 @@ def update_shukei(shukei_book, category, number, hyoka_book):
 if __name__ == '__main__':
     shukei_xls = sys.argv[1]
     basedir = os.path.dirname(shukei_xls)
+    print("Loading %s ... " % shukei_xls)
     shukei_book = openpyxl.load_workbook(shukei_xls)
     for c in ['A', 'B', 'C', 'D']:
         for n in [i for i in range(101, 121)] + [i for i in range(201, 221)]:
