@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime as dt
+import logging
 import openpyxl
 import os
 import sys
@@ -51,7 +52,14 @@ class Hyoka:
         return (len(lab) > 0)
 
 def get_room(category, number):
-    return "%s室(%s)" % (category, ("AM" if number < 200 else "PM"))
+    if number > 100 and number < 200:
+        ampm = 'AM'
+    elif number > 200 and number < 300:
+        ampm = 'PM'
+    else:
+        raise WrongBookException("Wrong number - %s-%d" % (category, number))
+
+    return "%s室(%s)" % (category, ampm)
 
 def get_hyokasha(category, number, book):
     room = get_room(category, number)
@@ -141,22 +149,20 @@ def update_shukei(shukei_book, category, number, hyoka_book):
     try:
         check_correct_book(category, number, hyoka_book)
     except WrongBookException as e:
-        print("WARN: This book may be wrong %s-%d - %s" % (category, number, e))
-        return
+        raise WrongBookException("This book may be wrong %s-%d - %s" % (category, number, e))
 
     hyokas = get_hyokas(category, number, hyoka_book)
     if len(hyokas) == 0:
-        print("WARN: point data is not found - %s-%d" % (category, number))
-        return
+        raise WrongBookException("No point data - %s-%d" % (category, number))
 
     (room, hyokasha, laboratory, _) = get_hyokasha(category, number, hyoka_book)
-    print("%s %s-%d %s %s" % (room, category, number, hyokasha, laboratory))
+    logging.info("%s %s-%d %s %s" % (room, category, number, hyokasha, laboratory))
     
     for hyoka in hyokas:
         try:
             sheet = shukei_book[hyoka.room]
         except KeyError:
-            print("ERROR: sheet not found '%s' in shukei book - %s" % (hyoka.room, hyoka))
+            logging.error("sheet not found '%s' in shukei book - %s" % (hyoka.room, hyoka))
             continue
 
         # AN = 40
@@ -165,7 +171,7 @@ def update_shukei(shukei_book, category, number, hyoka_book):
         cell = sheet.cell(row=3, column=column_num)
         if cell.value != hyoka.number:
             # ichiou check suru
-            print("ERROR: student number is wrong - number=%d vs %s=%d" %
+            logging.error("student number is wrong - number=%d vs %s=%d" %
                     (hyoka.number, cell.coordinate, cell.value if cell.value else -1))
             continue
 
@@ -178,7 +184,7 @@ def update_shukei(shukei_book, category, number, hyoka_book):
             continue
         if cell.value != hyoka.present_num:
             # ichiou check suru
-            print("ERROR: student number is wrong - present_num=%d vs %s=%d" %
+            logging.error("student number is wrong - present_num=%d vs %s=%d" %
                     (hyoka.present_num, cell.coordinate, (cell.value if cell.value else -1)))
             continue
 
@@ -186,13 +192,24 @@ def update_shukei(shukei_book, category, number, hyoka_book):
         qa_point_cell = sheet.cell(row=row_num, column=column_num+1)
         tech_point_cell.value = hyoka.tech_point
         qa_point_cell.value = hyoka.qa_point
-        print("Updated %s#%s:%s - %s" % 
+        logging.info("Updated %s#%s:%s - %s" % 
                 (sheet.title, tech_point_cell.coordinate, qa_point_cell.coordinate, hyoka))
 
 if __name__ == '__main__':
     shukei_xls = sys.argv[1]
+    
     basedir = os.path.dirname(shukei_xls)
-    print("Loading %s ... " % shukei_xls)
+    filename = os.path.basename(shukei_xls)
+    filebase = os.path.splitext(filename)[0]
+    fileext = os.path.splitext(filename)[1]
+    newpath = os.path.join(basedir, filebase + "_auto_" + dt.now().strftime('%Y%m%d-%H%M%S') + fileext)
+
+    logfile = os.path.join(basedir, filebase + "_ログ.txt")
+    logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s %(levelname)s - %(message)s')
+
+    logging.info("Start")
+
+    logging.info("Loading %s ... " % shukei_xls)
     shukei_book = openpyxl.load_workbook(shukei_xls)
     for c in ['A', 'B', 'C', 'D']:
         for n in [i for i in range(101, 121)] + [i for i in range(201, 221)]:
@@ -202,17 +219,17 @@ if __name__ == '__main__':
                 if not os.path.exists(xls_path):
                     continue
 
-                print("Loading %s ... " % xls_path)
+                logging.info("Loading %s ... " % xls_path)
                 hyoka_book = openpyxl.load_workbook(xls_path, read_only=True, data_only=True)
                 update_shukei(shukei_book, c, n, hyoka_book)
+            except WrongBookException as e:
+                logging.error(e)
             except:
-                traceback.print_exc(file=sys.stdout)
-                print("ERROR: failed to process %s" % xls_name)
+                logging.error(traceback.format_exc())
+                logging.error("failed to process %s" % xls_name)
 
-    filename = os.path.basename(shukei_xls)
-    filebase = os.path.splitext(filename)[0]
-    fileext = os.path.splitext(filename)[1]
-    newpath = os.path.join(basedir, filebase + "_auto_" + dt.now().strftime('%Y%m%d-%H%M%S') + fileext)
+    logging.info("Save to %s" % newpath)
     shukei_book.save(newpath)
-    print("Saved to %s" % newpath)
+
+    logging.info("Done")
 
