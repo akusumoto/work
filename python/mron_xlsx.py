@@ -1,12 +1,19 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from datetime import datetime as dt
 import logging
-import openpyxl
+
+from datetime import datetime as dt
 import os
 import sys
 import traceback
+try:
+    import openpyxl
+except:
+    logging.basicConfig(filename='error.txt')
+    logging.error(traceback.format_exc())
+    sys.exit(1)
+
 
 class NotMemberException(Exception):
     pass
