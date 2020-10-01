@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from datetime import datetime as dt
 import openpyxl
-import sys
 import os
-import copy
-import datetime
+import sys
+import traceback
 
 class NotMemberException(Exception):
     pass
@@ -47,10 +47,7 @@ class Hyoka:
 #                 self.comment))
 
     def _is_student(self):
-        lab = copy.copy(self.laboratory)
-        lab.replace('研究室','')
-        lab.replace(' ', '')
-        lab.replace('　','')
+        lab = self.laboratory.replace('研究室','').replace(' ', '').replace('　','')
         return (len(lab) > 0)
 
 def get_room(category, number):
@@ -209,12 +206,13 @@ if __name__ == '__main__':
                 hyoka_book = openpyxl.load_workbook(xls_path, read_only=True, data_only=True)
                 update_shukei(shukei_book, c, n, hyoka_book)
             except:
-                print("ERROR: %s\n%s" % (sys.exc_info()[0], sys.exc_info[2]))
+                traceback.print_exc(file=sys.stdout)
+                print("ERROR: failed to process %s" % xls_name)
 
     filename = os.path.basename(shukei_xls)
     filebase = os.path.splitext(filename)[0]
     fileext = os.path.splitext(filename)[1]
-    newpath = os.path.join(basedir, filebase + "_auto_" + datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + fileext)
+    newpath = os.path.join(basedir, filebase + "_auto_" + dt.now().strftime('%Y%m%d-%H%M%S') + fileext)
     shukei_book.save(newpath)
     print("Saved to %s" % newpath)
 
