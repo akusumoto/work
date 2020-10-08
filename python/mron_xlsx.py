@@ -15,9 +15,6 @@ except:
     sys.exit(1)
 
 
-class NotMemberException(Exception):
-    pass
-
 class WrongBookException(Exception):
     pass
 
