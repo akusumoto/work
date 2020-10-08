@@ -11,8 +11,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
+//import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+//import { MatSort } from '@angular/material/sort';
 
 import { TableSampleComponent } from './table-sample/table-sample.component';
 
@@ -31,8 +32,8 @@ import { TableSampleComponent } from './table-sample/table-sample.component';
     MatMenuModule,
     MatSidenavModule,
     MatTableModule,
-    MatSort,
-    MatTableDataSource
+    //MatSort,
+    //MatTableDataSource
   ],
   providers: [],
   bootstrap: [AppComponent]
