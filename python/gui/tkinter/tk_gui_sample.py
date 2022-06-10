@@ -16,7 +16,13 @@ def clear_txt(txt):
 def func_txt(txt):
 	txt.insert(tk.END, "INSERTED!!\n")
 
-
+win = None
+def open_new_window():
+	global win
+	if win == None:
+		win = tk.Toplevel(window)
+		win.title("New Window")
+	
 window = tk.Tk()
 window.title("Hello World")
 window.geometry("400x400")
@@ -70,5 +76,10 @@ btn_ok.pack(fill=tk.Y, side=tk.LEFT)
 
 frm_frame2_btns.pack()
 frm_frame2.pack(fill=tk.Y)
+
+frm_frame3 = tk.Frame(master=window)
+btn_popup = tk.Button(master=frm_frame3, text="Popup", command=open_new_window)
+btn_popup.pack()
+frm_frame3.pack(fill=tk.Y)
 
 window.mainloop()
