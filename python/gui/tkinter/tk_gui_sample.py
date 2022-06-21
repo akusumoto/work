@@ -22,10 +22,28 @@ def open_new_window():
 	if win == None:
 		win = tk.Toplevel(window)
 		win.title("New Window")
+
+current_picture_name = ''
+def change_picture(canvas, cvid):
+	global current_picture_name, img
+
+	if current_picture_name == 'pic/pc1.png':
+		current_picture_name = 'pic/pc2.png'
+		print('change picture -> pic/pc2.png')
+	elif current_picture_name == 'pic/pc2.png':
+		current_picture_name = 'pic/pc1.png'
+		print('change picture -> pic/pc1.png')
+
+	img = tk.PhotoImage(file=current_picture_name)
+	img = img.subsample(5) # 512 / 5 -> 100?
+
+	canvas.itemconfig(cvid, image=img)
+
+	
 	
 window = tk.Tk()
 window.title("Hello World")
-window.geometry("400x400")
+window.geometry("400x800")
 
 menu = tk.Menu(window)
 
@@ -81,5 +99,18 @@ frm_frame3 = tk.Frame(master=window)
 btn_popup = tk.Button(master=frm_frame3, text="Popup", command=open_new_window)
 btn_popup.pack()
 frm_frame3.pack(fill=tk.Y)
+
+
+frm_frame4 = tk.Frame(master=window)
+canvas = tk.Canvas(master=frm_frame4)
+current_picture_name = 'pic/pc1.png'
+img = tk.PhotoImage(file=current_picture_name)
+img = img.subsample(5) # 512 / 5 -> 100?
+cvid = canvas.create_image(0, 0, image=img, anchor=tk.NW)
+canvas.pack()
+
+btn_change = tk.Button(master=frm_frame4, text='Change', command=lambda c=canvas, cvid=cvid: change_picture(c, cvid))
+btn_change.pack()
+frm_frame4.pack(fill=tk.Y)
 
 window.mainloop()
