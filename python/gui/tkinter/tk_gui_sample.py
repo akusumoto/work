@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import tkinter as tk
+import os
 
 def func_ok():
 	print("OK")
@@ -23,18 +24,19 @@ def open_new_window():
 		win = tk.Toplevel(window)
 		win.title("New Window")
 
+base_dir = os.path.dirname(__file__)
+
 current_picture_name = ''
 def change_picture(canvas, cvid):
 	global current_picture_name, img
 
 	if current_picture_name == 'pic/pc1.png':
 		current_picture_name = 'pic/pc2.png'
-		print('change picture -> pic/pc2.png')
 	elif current_picture_name == 'pic/pc2.png':
 		current_picture_name = 'pic/pc1.png'
-		print('change picture -> pic/pc1.png')
+	print('change picture -> ' + current_picture_name)
 
-	img = tk.PhotoImage(file=current_picture_name)
+	img = tk.PhotoImage(file=os.path.join(base_dir, current_picture_name))
 	img = img.subsample(5) # 512 / 5 -> 100?
 
 	canvas.itemconfig(cvid, image=img)
@@ -104,7 +106,7 @@ frm_frame3.pack(fill=tk.Y)
 frm_frame4 = tk.Frame(master=window)
 canvas = tk.Canvas(master=frm_frame4)
 current_picture_name = 'pic/pc1.png'
-img = tk.PhotoImage(file=current_picture_name)
+img = tk.PhotoImage(file=os.path.join(base_dir, current_picture_name))
 img = img.subsample(5) # 512 / 5 -> 100?
 cvid = canvas.create_image(0, 0, image=img, anchor=tk.NW)
 canvas.pack()
