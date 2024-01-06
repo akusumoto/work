@@ -36,11 +36,14 @@ CASODES = [
     Pin(C05, Pin.OUT),
 ]
 
+def is_on(led_matrix, c, a):
+    return led_matrix[c] & (0b000001 << a) > 0
+
 def set_led(led_matrix):
     for c in range(NCASODE):
         CASODES[c].value(0)
         for a in range(NANODE):
-            if led_matrix[c][a] > 0:
+            if is_on(led_matrix, c, a):
                 ANODES[a].value(1)
             else:
                 ANODES[a].value(0)
@@ -61,36 +64,12 @@ initialize()
 
 
 led = [
-    [0, 1, 1, 1, 1, 0],
-    [1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1],
-    [0, 1, 1, 1, 1, 0],
+    0b100010,
+    0b010101,
+    0b001001,
+    0b010101,
+    0b100010
 ]
 
 while True:
     set_led(led)
-
-"""
-t = utime.ticks_ms()
-while True:
-    for c in range(NCASODE):
-        print(f"C{c}")
-        while t + 500 > utime.ticks_ms():
-            set_led(led)
-        
-        t = utime.ticks_ms()
-        for cc in range(NCASODE):
-            for aa in range(NANODE):
-                led[cc][aa] = 1 if cc == c else 0
-
-    for a in range(NANODE):
-        print(f"A{a}")
-        while t + 500 > utime.ticks_ms():
-            set_led(led)
-        t = utime.ticks_ms()
-
-        for cc in range(NCASODE):
-            for aa in range(NANODE):
-                led[cc][aa] = 1 if aa == a else 0
-"""
