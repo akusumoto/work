@@ -36,19 +36,46 @@ CASODES = [
     Pin(C05, Pin.OUT),
 ]
 
-# intialize
+def initialize():
+    for c in range(NCASODE):
+        CASODES[c].value(1)
+        for a in range(NANODE):
+            ANODES[a].value(0)
 
+# intialize
+initialize()
+
+# loop by casode
 for c in range(NCASODE):
-    CASODES[c].value(1)
+    #print(f"C{c}")
+    CASODES[c].value(0)
+    for a in range(NANODE):
+        ANODES[a].value(1)
+    utime.sleep(0.5)
+
     for a in range(NANODE):
         ANODES[a].value(0)
+    CASODES[c].value(1)
+
+# loop by anode
+for a in range(NANODE):
+    #print(f"A{a}")
+    ANODES[a].value(1)
+    for c in range(NCASODE):
+        CASODES[c].value(0)
+    utime.sleep(0.5)
+
+    for c in range(NCASODE):
+        CASODES[c].value(1)
+    ANODES[a].value(0)
+
 
 while True:
     for c in range(NCASODE):
-        #print(f"C{c}")
         CASODES[c].value(0)
         for a in range(NANODE):
             ANODES[a].value(1)
-        utime.sleep(0.5)
+        utime.sleep(0.005)
+        for a in range(NANODE):
+            ANODES[a].value(0)
         CASODES[c].value(1)
-
